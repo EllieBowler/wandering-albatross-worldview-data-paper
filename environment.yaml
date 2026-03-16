@@ -1,0 +1,26 @@
+name: annotation-env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - jupyterlab
+  - nodejs
+  - nb_conda_kernels
+  - jupyterhub
+  - pandas
+  - gdal
+  - geopandas
+  - rasterio
+  - ipykernel
+  - bottleneck
+  - netcdf4
+  - dask
+  - xarray
+  - rioxarray
+  - cartopy
+  - natsort
+  - pillow          # image I/O used by scripts
+  - shapely         # geometry operations
+  - pyproj          # coordinate transformations
+
