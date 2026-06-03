@@ -62,8 +62,9 @@ git clone https://github.com/elliebowler/wandering-albatross-worldview-data-pape
 ```
 
 #### 2. Set up a virtual environment:
+This command reads the environment.yaml file and installs all dependencies
 ```shell
-conda env install environment.yaml
+conda env create -f environment.yaml
 ```
 
 #### 3. Activate the virtual environment:
