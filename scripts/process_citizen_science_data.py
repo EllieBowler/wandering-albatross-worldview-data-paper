@@ -70,14 +70,65 @@ def extract_site_name(df: pd.DataFrame) -> pd.DataFrame:
     df["site_name"] = site_names
     return df
 
+
+def downsample_reviewers_to_7(tile_row, annotation_df):
+    """
+    For images with rem_TileV > 7, randomly downsample to exactly 7 reviewers.
+    Randomly removes excess reviewers from the three positive voting categories.
+    Only removes annotations if rem_Feat is decremented.
+
+    Returns: (modified_tile_row, user_ids_to_remove_from_annotations)
+    """
+    if tile_row.rem_TileV <= 7:
+        return tile_row, []
+
+    tile_row = tile_row.copy()
+    users_to_remove = []
+    excess_reviewers = int(tile_row.rem_TileV - 7)
+
+    # Only consider annotators for this specific image when removing rem_Feat votes
+    img_annotations = annotation_df[annotation_df.imgname == tile_row.imgname]
+    available_users_for_tile = list(pd.unique(img_annotations.user_id))
+
+    category_pool = (
+        ['rem_Feat'] * int(tile_row.rem_Feat)
+        + ['rem_NoFeat'] * int(tile_row.rem_NoFeat)
+        + ['rem_Poor'] * int(tile_row.rem_Poor)
+    )
+
+    if len(category_pool) != int(tile_row.rem_TileV):
+        raise ValueError(
+            f"Category pool length {len(category_pool)} does not match rem_TileV {tile_row.rem_TileV} for image {tile_row.imgname}"
+        )
+
+    categories_to_remove = np.random.choice(category_pool, size=excess_reviewers, replace=False).tolist()
+
+    for category in categories_to_remove:
+        setattr(tile_row, category, getattr(tile_row, category) - 1)
+
+        if category == 'rem_Feat' and available_users_for_tile:
+            user_to_remove = np.random.choice(available_users_for_tile)
+            users_to_remove.append(user_to_remove)
+            available_users_for_tile.remove(user_to_remove)
+
+    # Update rem_TileV to reflect new total
+    tile_row.rem_TileV = tile_row.rem_Feat + tile_row.rem_NoFeat + tile_row.rem_Poor
+
+    if tile_row.rem_TileV != 7:
+        raise ValueError(
+            f"Downsampled image {tile_row.imgname} has rem_TileV={tile_row.rem_TileV} instead of 7"
+        )
+        
+    return tile_row, users_to_remove
+
   
 def clean_image_and_annotations_df(
     full_tile_df: pd.DataFrame, full_annotation_df: pd.DataFrame
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Apply quality filters and tidy columns for the citizen science data.
 
-    * Drops the single WorldView‑4 tile which was processed differently.\n
-    * Keeps only tiles reviewed by exactly seven users (after bad workers\n      were removed).\n
+    * Keeps tiles reviewed by exactly seven users (after bad workers\n      were removed).\n
+    * If tiles have more than seven reviewers, randomly downsample to seven reviewers and remove\n      excess annotations from the three voting categories.\n
     * Adds a ``site_name`` column and renames metadata fields to more\n      descriptive names.\n
     Parameters
     ----------
@@ -91,65 +142,57 @@ def clean_image_and_annotations_df(
         (clean_tiles, clean_annotations) with indexes reset.
     """
     print("There are {} images in the full tile dataframe.".format(len(full_tile_df)))
-
-    # Remove single WorldView-4 image
-    clean_tile_df = full_tile_df[full_tile_df.sensor != "worldview-04"]
-    print("Removed WorldView-4 image, leaving {} images.".format(len(clean_tile_df)))
-
+    
     # Remove any tiles reviewed by less than seven people, after bad workers removed
-    clean_tile_df = clean_tile_df[~(clean_tile_df.rem_TileV < 7)]
-    print(
-        "Removed tiles reviewed by less than seven people, leaving {} images.".format(
-            len(clean_tile_df)
-        )
-    )
+    clean_tile_df = full_tile_df[~(full_tile_df.rem_TileV < 7)]
+    print("Removed tiles reviewed by less than seven people, leaving {} images.".format(len(clean_tile_df)))
+    
+    # For tiles reviewed by more than seven people, randomly downsample to 7
+    clean_annotation_df = full_annotation_df.copy()
+    tiles_over_7 = clean_tile_df[clean_tile_df.rem_TileV > 7]
+    
+    if len(tiles_over_7) > 0:
+        print("Downsampling {} tiles with more than 7 reviewers to exactly 7 reviewers...".format(len(tiles_over_7)))
+        
+        users_to_remove_all = []
+        
+        for idx, tile_row in tiles_over_7.iterrows():
+            modified_tile_row, users_to_remove = downsample_reviewers_to_7(tile_row, clean_annotation_df)
+            clean_tile_df.loc[idx] = modified_tile_row
+            users_to_remove_all.extend([(tile_row.imgname, user_id) for user_id in users_to_remove])
+        
+        # Remove annotations for the selected users
+        if users_to_remove_all:
+            for imgname, user_id in users_to_remove_all:
+                clean_annotation_df = clean_annotation_df[~((clean_annotation_df.imgname == imgname) & 
+                                                             (clean_annotation_df.user_id == user_id))]
+            print(f"Removed {len(users_to_remove_all)} annotations from downsampled images.")
+        
+        print("Downsampling complete. {} images now have exactly 7 reviewers.".format(len(tiles_over_7)))
 
-    # Remove any tiles reviewed by more than seven people, after bad workers removed
-    clean_tile_df = clean_tile_df[~(clean_tile_df.rem_TileV > 7)]
-    print(
-        "Removed tiles reviewed by more than seven people, leaving {} images.".format(
-            len(clean_tile_df)
-        )
-    )
-
-    # Convert the 'basename' to 'site_name' by removing specific patterns
+    # 3. Convert the 'basename' to 'site_name' by removing specific patterns
     clean_tile_df = extract_site_name(clean_tile_df)
 
-    # Remove redundant columns
-    clean_tile_df = clean_tile_df.drop(
-        columns=[
-            "level_0",
-            "index",
-            "basename",
-            "all_Feat",
-            "all_NoFeat",
-            "all_Poor",
-            "all_TileV",
-            "geometry",
-        ]
-    )
+    # 4. Remove redundant columns
+    clean_tile_df = clean_tile_df.drop(columns=["level_0", "index", "basename", "all_Feat", 'all_NoFeat', 'all_Poor', 'all_TileV', 'geometry'])
 
-    # Rename columns for clarity
-    clean_tile_df = clean_tile_df.rename(
-        columns={
-            "acq_date": "acquisition_date",
-            "off_nadir": "off_nadir_angle",
-            "cloud_cove": "cloud_cover_percentage",
-            "target_az": "target_azimuth",
-            "catid": "catalogue_id",
-            "rem_TileV": "num_reviewers",
-            "rem_Feat": "num_feature_present",
-            "rem_NoFeat": "num_no_feature_present",
-            "rem_Poor": "num_poor_image",
-        }
-    )
+    # 5. Rename columns for clarity
+    clean_tile_df = clean_tile_df.rename(columns={
+        "acq_date": "acquisition_date",
+        "off_nadir": "off_nadir_angle",
+        "cloud_cove": "cloud_cover_percentage",
+        "target_az": "target_azimuth",
+        "catid": "catalogue_id",  
+        "rem_TileV": "num_reviewers",
+        "rem_Feat": "num_feature_present",
+        "rem_NoFeat": "num_no_feature_present",
+        "rem_Poor": "num_poor_image"
+    })
 
-    # Reset index of the cleaned grid
+    # 3. Reset index of the cleaned grid
     clean_tile_df.reset_index(drop=True, inplace=True)
-
-    clean_annotation_df = full_annotation_df[full_annotation_df.imgname.isin(full_annotation_df.imgname.unique())]
     clean_annotation_df.reset_index(drop=True, inplace=True)
-
+    
     return clean_tile_df, clean_annotation_df
 
 
@@ -211,12 +254,13 @@ if __name__ == "__main__":
     # Prepare JSON structure
     output_json = {
         "dataset_info": {
-            "name": "Citizen science annotations of wandering albatrosses in satellite imagery, a dataset for training machine learning models",
+            "name": "WorldView-3/4 satellite image tiles of wandering albatross breeding sites on South Georgia with citizen science annotations of individual birds, 2015-2022",
             "authors": "Ellen Bowler, Marie R. G. Attard, Richard A. Phillips, Peter T. Fretwell", 
-            "doi": "placeholder",  # Replace with actual DOI
-            "description": "Citizen science point annotations of wandering albatrosses in MAXAR WorldView-3 satellite imagery over South Georgia, with associated metadata",
+            "doi": "https://doi.org/10.5285/fd82803b-6764-4b50-a8ef-0e8729c07870",
+            "citation": """Bowler, E., Attard, M., Phillips, R., & Fretwell, P. (2026). WorldView-3/4 satellite image tiles of wandering albatross breeding sites on South Georgia with citizen science annotations of individual birds, 2015-2022 (Version 1.0) [Data set]. NERC EDS UK Polar Data Centre. https://doi.org/10.5285/fd82803b-6764-4b50-a8ef-0e8729c07870""",
+            "description": "Citizen science point annotations of wandering albatrosses in Vantor WorldView-3/4 satellite imagery over South Georgia, with associated metadata",
             "version": "1.0",
-            "source": "MAXAR WorldView-3",
+            "source": "Vantor WorldView-3 and WorldView-4",
             "date_created": pd.Timestamp.now().strftime("%Y-%m-%d"),
         },
         "images": [], 

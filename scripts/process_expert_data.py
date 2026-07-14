@@ -170,10 +170,11 @@ if __name__ == "__main__":
         "dataset_info": {
             "name": "Expert annotations of wandering albatrosses in satellite imagery, a dataset for validating results",
             "authors": "Ellen Bowler, Marie R. G. Attard, Richard A. Phillips, Peter T. Fretwell", 
-            "doi": "placeholder",  # Replace with actual DOI
+            "doi": "https://doi.org/10.5285/fd82803b-6764-4b50-a8ef-0e8729c07870",
+            "citation": """Bowler, E., Attard, M., Phillips, R., & Fretwell, P. (2026). WorldView-3 satellite image tiles of wandering albatross breeding sites on South Georgia with citizen science annotations of individual birds, 2015-2022 (Version 1.0) [Data set]. NERC EDS UK Polar Data Centre. https://doi.org/10.5285/fd82803b-6764-4b50-a8ef-0e8729c07870""",
             "description": "Expert point annotations of wandering albatrosses at four breeding sites, captured in MAXAR WorldView-3 satellite imagery, with associated metadata",
             "version": "1.0",
-            "source": "MAXAR WorldView-3",
+            "source": "Vantor WorldView-3 and WorldView-4",
             "date_created": pd.Timestamp.now().strftime("%Y-%m-%d"),
         },
         "images": [], 
