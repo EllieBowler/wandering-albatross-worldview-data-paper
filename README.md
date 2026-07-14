@@ -1,11 +1,10 @@
-# Citizen science annotations of wandering albatrosses in satellite imagery, a dataset for training machine learning models
+# Citizen science annotations of wandering albatrosses in WorldView-3/4 satellite imagery
 
 
 This repository contains python preprocessing scripts and demonstration jupyter notebooks for the dataset paper:
-**Bowler et al. (2026) "Citizen science annotations of wandering albatrosses in satellite imagery, a dataset for training machine learning models" [in review].**
+**Bowler et al. (2026) "Citizen science annotations of wandering albatrosses in WorldView-3/4 satellite imagery."**
 
-This data paper contains images and annotations from the *Albatrosses from space* citizen science campaign, aiming to count wandering albatrosses in high-resolution WorldView-3 satellite imagery (31 cm resolution). Details and outcomes of that study are published in the paper:
-**Attard et al. (2026) "Crowdsourcing for conservation: A citizen science approach to monitoring wandering albatrosses using satellite imagery" [in prep].**
+The dataset contains images and annotations from the *Albatrosses from space* citizen science campaign, aiming to count wandering albatrosses in 31 cm resolution satellite imagery (from Vantor's WorldView-3 and WorldView-4 sensors). 
 
 
 We publish this dataset of image tiles and annotations with the hope that it will improve access to training examples for machine learning model development, and for investigation into uncertainty derived from inter-observer variability. 
@@ -32,13 +31,13 @@ We publish this dataset of image tiles and annotations with the hope that it wil
 ## Introduction <a name="introduction"></a>
 
 
-We conducted the first citizen science campaign to count wandering albatrosses *Diomedea exulans* during the breeding season using Vantor's (previously Maxar Technologies) GeoHive platform and very high-resolution (31 cm) satellite imagery, collected over 24 locations in South Georgia between 2015 to 2022. Citizen scientists labelled  albatrosses in 150 m × 150 m image tiles, with each viewed by seven unique users. In total, citizen scientists classified 10,833 tiles, covering 154 km² of breeding habitat. 
+We conducted the first citizen science campaign to count wandering albatrosses *Diomedea exulans* during the breeding season using Vantor's (previously Maxar Technologies) GeoHive platform and very high-resolution (31 cm) satellite imagery, collected over 24 locations in South Georgia between 2015 to 2022. Citizen scientists labelled  albatrosses in 150 m × 150 m image tiles, with each viewed by seven unique users. In total, citizen scientists classified 10,930 tiles, covering 154 km² of breeding habitat. 
 
 This repository includes python scripts and notebooks which were used to preprocess the citizen science annotations and georeferenced image tiles ready for publication. We note these georeferenced images tiles are not included due to licensing restrictions, however we hope these scripts can be useful for others who wish to publish their own data in a similar way. 
 
-The repository also includes demonstration notebooks showing how final images and annotations can be loaded ready for use with common machine learning models. The final image/annotation dataset can be freely download from the Polar Data Centre (DOI: ). To run the demonstration notebooks these files should be placed in the `data` folder of this repository once installed (see details below). 
+The repository also includes demonstration notebooks showing how final images and annotations can be loaded ready for use with common machine learning models. The final image/annotation dataset can be download from the Polar Data Centre (DOI: https://doi.org/10.5285/fd82803b-6764-4b50-a8ef-0e8729c07870). To run the demonstration notebooks these files should be placed in the `data` folder of this repository once installed (see details below). 
 
-<img src="./graphics/Figure3-example-tiles-label-update.png" width=100% height=100%>
+<img src="./graphics/Figure3-example-tiles-label-update-with-classifications.png" width=100% height=100%>
 
 
 ## Data overview <a name="data-overview"></a>
@@ -47,7 +46,7 @@ The data consists of .png image tiles and corresponding x,y pixel annotations in
 
 **Citizen science image annotations**: These include all annotations made by each citizen scientist. Citizen scientists can be differentiated by their unique "user id". An example is shown on the image below. 
 
-**Expert annotations** A subset of tiles were annotated by seven expert obervers (with previous experience annotating wildlife in very high resolution satellite imagery). These annotations are provided in different files and can be used for comparison and validation. 
+**Expert annotations** A subset of tiles were annotated by seven expert observers (with previous experience annotating wildlife in very high resolution satellite imagery). These annotations are provided in different files and can be used for comparison and validation. 
 
 
 <img src="./graphics/Figure2-example-annotations.png" width=80% height=80%>
@@ -115,23 +114,23 @@ paths are passed as command‑line arguments.  When adapting the scripts for you
 own work please retain a citation to the accompanying data paper:
 
 Ellen Bowler, Marie R. G. Attard, Richard A. Phillips and Peter T. Fretwell
-(2026) "Citizen science annotations of wandering albatrosses in satellite
-imagery, a dataset for training machine learning models". [In Review]
+(2026) "Citizen science annotations of wandering albatrosses in WorldView-3/4 satellite imagery".
 
 
 ## Data access <a name="data-access"></a>
 
-Non-georeferenced image tiles and .csv and .json formatted labels from the crowdsourcing campaign can be downloaded from the Polar Data Centre (doi: [Insert doi]). 
+Non-georeferenced image tiles and .csv and .json formatted labels from the crowdsourcing campaign can be downloaded from the Polar Data Centre (doi: https://doi.org/10.5285/fd82803b-6764-4b50-a8ef-0e8729c07870). All relevant metadata and extra details are included in the data repository. 
+
 
 ## Acknowledgements <a name="acknowledgements"></a>
-Thank you to Sally Poncet for her contributions throughout the project and for provision of ground survey data and breeding site boundaries. We thank all fieldworkers for their extensive efforts to complete ground counts of wandering albatrosses, especially Ken Passfield (over 15 seasons) and Dion Poncet (two decadal censuses). We are grateful to Connor Bamford, Tara Cunningham, Hugo Guímaro, Penny Clarke and Holly Houliston from BAS for their contributions to the private campaign, and to all participants in the citizen science campaign. We thank the Vantor GeoHIVE team—Denise Davis, Julie Earls, Dimitrios Roussos, Paulo Godinho and Sebastian Potter—for their assistance, and Mari Whitelaw (Polar Data Centre) for her data repository expertise. Thanks to Venessa Amaral-Rogers (RSPB), Athena Dinar (BAS) and Atikata Miyabe and Yasuko Suziki (Birdlife International Tokyo) for campaign promotion. Finally, we appreciate the ongoing feedback from our project partners, RSPB and the Government of South Georgia and the South Sandwich Islands. 
+This work was supported by Darwin Plus (DPLUS187 and DPLUS132). We are grateful to the following: Sally Poncet for her contributions throughout the project and for provision of ground survey data and breeding site boundaries; all fieldworkers who took part in ground counts of wandering albatrosses, especially Ken Passfield (over 15 seasons) and Dion Poncet (two decadal censuses); Connor Bamford, Tara Cunningham, Hugo Guímaro, Penny Clarke and Holly Houliston from BAS for their contributions to the private campaign; all participants in the citizen science campaign; the Vantor GeoHIVE team - Denise Davis, Julie Earls, Dimitrios Roussos, Paulo Godinho and Sebastian Potter - for their assistance; Mari Whitelaw (Polar Data Centre) for her data repository expertise, and; Venessa Amaral-Rogers (RSPB), Athena Dinar (BAS) and Atikata Miyabe and Yasuko Suziki (Birdlife International Tokyo) for campaign promotion. We appreciate the feedback from our project partners, RSPB and the Government of South Georgia and the South Sandwich Islands. Finally, thanks to Tiffany Vlaar and four anonymous reviewers for their feedback on earlier drafts of the dataset paper. 
 
 ## License <a name="license"></a>
 
-The satellite images and annotations are subject to the Vantor Satellite Imagery License Agreement:
+The satellite image tiles are shared with permission from Vantor under a CC-BY-4.0. All derivatives (including data derivatives) must include the following copyright notice on or adjacent to the derivative: &copy; Vantor Products.
 https://www.maxar.com/legal/internal-use-license
 
 ## Funding <a name="funding"></a>
 
-This work was supported by Darwin Plus (DPLUS132 and DPLUS187). For more details, visit the Darwin Initiative project website: https://www.darwininitiative.org.uk/project/DPLUS132
+This work was supported by Darwin Plus (DPLUS132 and DPLUS187). For more details, visit the Darwin Initiative project websites: https://www.darwininitiative.org.uk/project/DPLUS132 and https://www.darwininitiative.org.uk/project/DPLUS187/ 
 
