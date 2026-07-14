@@ -37,7 +37,7 @@ This repository includes python scripts and notebooks which were used to preproc
 
 The repository also includes demonstration notebooks showing how final images and annotations can be loaded ready for use with common machine learning models. The final image/annotation dataset can be download from the Polar Data Centre (DOI: https://doi.org/10.5285/fd82803b-6764-4b50-a8ef-0e8729c07870). To run the demonstration notebooks these files should be placed in the `data` folder of this repository once installed (see details below). 
 
-<img src="./graphics/Figure3-example-tiles-label-update-with-classifications.png" width=100% height=100%>
+<img src="./graphics/Figure2-example-tiles-label-update-with-classifications.png" width=100% height=100%>
 
 
 ## Data overview <a name="data-overview"></a>
